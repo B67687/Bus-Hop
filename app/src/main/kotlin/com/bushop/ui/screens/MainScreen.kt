@@ -252,8 +252,6 @@ fun MainScreen(viewModel: MainViewModel) {
                 viewModel.findNearbyStops()
             }
         }
-    var showNearbyDialog by remember { mutableStateOf(false) }
-
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },

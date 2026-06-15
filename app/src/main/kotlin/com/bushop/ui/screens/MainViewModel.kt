@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /** Tracks the health of the external bus arrival API. */
@@ -53,11 +54,13 @@ class MainViewModel(
     companion object {
         private const val DEFAULT_AUTO_REFRESH_INTERVAL = 30
         private const val COLLAPSE_DEBOUNCE_MS = 500L
+        private const val REFRESH_COOLDOWN_MS = 400L
         private const val DEGRADED_THRESHOLD = 3
         private const val DOWN_THRESHOLD = 10
     }
 
-    private var isAutoRefreshing = false
+    private val isAutoRefreshing = AtomicBoolean(false)
+    private var searchJob: Job? = null
 
     private val autoRefreshController = AutoRefreshController(viewModelScope)
 
@@ -267,34 +270,78 @@ class MainViewModel(
     init {
         // Restore persisted preferences
         viewModelScope.launch {
-            repository.themeModeFlow.collect { mode ->
-                _themeModeFlow.value = mode
+            try {
+                repository.themeModeFlow.collect { mode ->
+                    _themeModeFlow.value = mode
+                }
+            } catch (
+                e: CancellationException,
+            ) {
+                throw e
+            } catch (_: Exception) {
+                // flow ended
             }
         }
         viewModelScope.launch {
-            repository.colorSchemeOptionFlow.collect { option ->
-                _colorSchemeOptionFlow.value = option
+            try {
+                repository.colorSchemeOptionFlow.collect { option ->
+                    _colorSchemeOptionFlow.value = option
+                }
+            } catch (
+                e: CancellationException,
+            ) {
+                throw e
+            } catch (_: Exception) {
+                // flow ended
             }
         }
         viewModelScope.launch {
-            autoRefreshIntervalSeconds = repository.getAutoRefreshIntervalOnce()
-            if (autoRefreshIntervalSeconds > 0) {
-                autoRefreshController.start(autoRefreshIntervalSeconds) { refreshAll(isAutoRefresh = true) }
+            try {
+                autoRefreshIntervalSeconds = repository.getAutoRefreshIntervalOnce()
+                if (autoRefreshIntervalSeconds > 0) {
+                    autoRefreshController.start(autoRefreshIntervalSeconds) { refreshAll(isAutoRefresh = true) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // ignored
             }
         }
         viewModelScope.launch {
-            repository.pinnedServicesFlow.collect { pinned ->
-                _pinnedServices.value = pinned
+            try {
+                repository.pinnedServicesFlow.collect { pinned ->
+                    _pinnedServices.value = pinned
+                }
+            } catch (
+                e: CancellationException,
+            ) {
+                throw e
+            } catch (_: Exception) {
+                // flow ended
             }
         }
         viewModelScope.launch {
-            repository.pinnedStopsFlow.collect { pinned ->
-                _pinnedStops.value = pinned
+            try {
+                repository.pinnedStopsFlow.collect { pinned ->
+                    _pinnedStops.value = pinned
+                }
+            } catch (
+                e: CancellationException,
+            ) {
+                throw e
+            } catch (_: Exception) {
+                // flow ended
             }
         }
         viewModelScope.launch {
-            repository.hasSeenHintFlow.collect { seen ->
-                hasSeenDragHint = seen
+            try {
+                repository.hasSeenHintFlow.collect { seen ->
+                    hasSeenDragHint = seen
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // flow ended
             }
         }
 
@@ -342,7 +389,7 @@ class MainViewModel(
                 lastUpdatedAll = list.maxOfOrNull { it.lastUpdated } ?: lastUpdatedAll
                 val pinnedFirst = list.sortedByDescending { it.isPinned }
                 _savedStops.value = pinnedFirst
-                if (pinnedFirst.isNotEmpty() && !isAutoRefreshing && pinnedFirst.any { it.services.isEmpty() || it.isStale }) {
+                if (pinnedFirst.isNotEmpty() && !isAutoRefreshing.get() && pinnedFirst.any { it.services.isEmpty() || it.isStale }) {
                     refreshAll(isAutoRefresh = true)
                 }
             }
@@ -363,10 +410,12 @@ class MainViewModel(
 
     fun searchBusStops(query: String) {
         addStopError = null
-        viewModelScope.launch(Dispatchers.Default) {
-            val results = repository.searchBusStops(query)
-            _searchResults.value = results
-        }
+        searchJob?.cancel()
+        searchJob =
+            viewModelScope.launch(Dispatchers.Default) {
+                val results = repository.searchBusStops(query)
+                _searchResults.value = results
+            }
     }
 
     fun findBusStopByCode(code: String) = repository.findBusStopByCode(code)
@@ -562,6 +611,14 @@ class MainViewModel(
         }
     }
 
+    /** Helper: update one stop in _savedStops by index without full list rebuild. */
+    private fun updateStop(
+        index: Int,
+        transform: (BusStopWithArrivals) -> BusStopWithArrivals,
+    ) {
+        _savedStops.value = _savedStops.value.toMutableList().apply { this[index] = transform(this[index]) }
+    }
+
     fun refreshArrivals(
         code: String,
         isAutoRefresh: Boolean = false,
@@ -575,8 +632,7 @@ class MainViewModel(
 
     fun refreshAll(isAutoRefresh: Boolean = false) {
         if (isAutoRefresh) {
-            if (isAutoRefreshing) return
-            isAutoRefreshing = true
+            if (!isAutoRefreshing.compareAndSet(false, true)) return
             viewModelScope.launch {
                 try {
                     refreshCoordinator.refreshAllConcurrent(
@@ -585,7 +641,7 @@ class MainViewModel(
                         refreshBlock = { refreshArrivalsInternal(it, true) },
                     )
                 } finally {
-                    isAutoRefreshing = false
+                    isAutoRefreshing.set(false)
                 }
             }
             return
@@ -600,7 +656,7 @@ class MainViewModel(
                     isAutoRefresh = false,
                     refreshBlock = { refreshArrivalsInternal(it, false) },
                 )
-                delay(400)
+                delay(REFRESH_COOLDOWN_MS)
             } finally {
                 isRefreshing = false
             }
