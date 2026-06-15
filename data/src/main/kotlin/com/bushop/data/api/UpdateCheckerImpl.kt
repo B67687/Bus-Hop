@@ -64,10 +64,12 @@ class UpdateCheckerImpl(
         return withContext(Dispatchers.IO) {
             try {
                 // Validate the download URL is from GitHub to prevent MITM redirect attacks
-                if (!info.downloadUrl.startsWith("https://") ||
-                    (!info.downloadUrl.contains("github.com") && !info.downloadUrl.contains("github-releases.githubusercontent.com"))
+                val uri = java.net.URI(info.downloadUrl)
+                val host = uri.host ?: return@withContext NetworkResult.Error("Invalid download URL: no host")
+                if (uri.scheme != "https" ||
+                    !(host.endsWith("github.com") || host.endsWith("github-releases.githubusercontent.com"))
                 ) {
-                    return@withContext NetworkResult.Error("Invalid download URL")
+                    return@withContext NetworkResult.Error("Invalid download URL: $host")
                 }
 
                 val updatesDir = File(context.cacheDir, "updates").also { it.mkdirs() }
@@ -84,6 +86,13 @@ class UpdateCheckerImpl(
                         "${context.packageName}.fileprovider",
                         targetFile,
                     )
+                // Check install permission on Android 8+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O &&
+                    !context.packageManager.canRequestPackageInstalls()
+                ) {
+                    return@withContext NetworkResult.Error("Install from unknown sources not enabled. Enable in Settings.")
+                }
+
                 val intent =
                     Intent(Intent.ACTION_VIEW).apply {
                         setDataAndType(apkUri, "application/vnd.android.package-archive")
