@@ -1,0 +1,18 @@
+
+# BusHop — Architecture Diagram
+
+Nodes:
+- UI Layer: MainActivity, MainScreen, MainViewModel, Theme
+- Domain Layer: Models (BusStop, BusArrival, BusStopWithArrivals, NetworkResult, ThemeMode, etc.), BusRepository (interface), UseCases (BusStopUseCase, AutoRefreshController, StopRefreshCoordinator)
+- Data Layer: ArrivelahApi (Retrofit), RetrofitBusArrivalDataSource, BusStopStorage, BusStopIndex (TokenTrie)
+- External: Arrivelah API, Local filesystem
+
+Flows:
+- User interacts with MainScreen → MainViewModel
+- MainViewModel → BusStopUseCase → BusRepository → RetrofitBusArrivalDataSource → Arrivelah API
+- MainViewModel → BusStopUseCase → BusRepository → BusStopStorage (local)
+- BusStopIndex (TokenTrie) loaded at startup → used by MainScreen for search
+- AutoRefreshController → periodic BusStopUseCase calls
+- Theme → persisted via BusStopStorage
+
+Direction: LR for top-level layers, TB within layers
