@@ -81,10 +81,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.bushop.BuildConfig
-import com.bushop.data.api.UpdateInfo
-import com.bushop.data.local.BusStopEntry
+import com.bushop.domain.model.BusStopEntry
 import com.bushop.domain.model.ColorSchemeOption
 import com.bushop.domain.model.ThemeMode
+import com.bushop.domain.model.UpdateInfo
 import com.bushop.ui.components.AddBusStopDialog
 import com.bushop.ui.components.BusStopCard
 import kotlinx.coroutines.Job
