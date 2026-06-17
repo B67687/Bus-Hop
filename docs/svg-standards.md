@@ -1,19 +1,27 @@
-# SVG Diagram Standards — BusHop / ithmb-codec style
+# SVG Diagram Standards
 
-## 1. File Format & ViewBox
+A design system for hand-crafted technical diagrams, built on established graph drawing and information visualization research.
 
-- Use hand-crafted inline SVG (no Mermaid-generated bloated SVGs)
-- `viewBox="0 0 800 N"` where N fits the content height with 30px minimum bottom margin
-- No embedded JavaScript, no external dependencies
+**Sources:** Sugiyama algorithm (1981), Graphviz DOT, ELK (Eclipse Layout Kernel), Colin Ware's _Information Visualization: Perception for Design_, Edward Tufte, UML 2.5 conventions, orthogonal graph drawing (Di Battista et al.).
+
+---
+
+## Part 1: Design System
+
+### 1. File Format
+
+- Hand-crafted inline SVG (no automated tool output)
+- `viewBox="0 0 800 N"` where N = content bottom + `--graph-padding` (12px)
+- No JavaScript, no external dependencies
 - Self-contained with inline `<defs>` and `<style>`
-- Root SVG: `font-family="Arial,sans-serif" font-size="13"`
-- `<defs>` order: `<marker>` then `<style>`
+- `<defs>` order: `<marker>` then `<style>` (marker must be defined before reference)
+- All coordinates must be even integers — no fractional pixels
 
-## 2. Boilerplate Template
+### 2. Boilerplate & CSS Vocabulary
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300"
-     font-family="Arial,sans-serif" font-size="13">
+     font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="12">
 <defs>
 <marker id="a" viewBox="0 0 10 10" refX="10" refY="5"
         markerWidth="8" markerHeight="8" orient="auto">
@@ -27,7 +35,7 @@ rect.or{fill:#fdf0d5;stroke:#f0ad4e;stroke-width:1;rx:3px}
 rect.dc{fill:#f0f0f0;stroke:#999;stroke-width:1;rx:3px}
 text.t{fill:#2c6fa0;font-weight:bold;font-size:14px;text-anchor:middle}
 text.l{fill:#333;text-anchor:middle;font-size:12px}
-text.s{fill:#666;text-anchor:middle;font-size:11px}
+text.s{fill:#555;text-anchor:middle;font-size:11px}
 path.e{stroke:#666;stroke-width:1.5;fill:none;marker-end:url(#a)}
 </style>
 </defs>
@@ -35,180 +43,280 @@ path.e{stroke:#666;stroke-width:1.5;fill:none;marker-end:url(#a)}
 </svg>
 ```
 
-## 3. CSS Class Reference
+| Class        | Fill           | Stroke    | Stroke-W | rx  | Semantics                                   |
+| ------------ | -------------- | --------- | -------- | --- | ------------------------------------------- |
+| `.bx`        | `#e8f4f8`      | `#4a90d9` | 1.5px    | 5px | **Container** — groups related components   |
+| `.i` / `.ci` | `#d4e8f0`      | `#4a90d9` | 1px      | 3px | **Inner** — sub-items within a container    |
+| `.gr`        | `#d4edda`      | `#5cb85c` | 1.5px    | 5px | **Primary** — key components, active steps  |
+| `.or`        | `#fdf0d5`      | `#f0ad4e` | 1px      | 3px | **Transition** — network, build, transform  |
+| `.dc`        | `#f0f0f0`      | `#999`    | 1px      | 3px | **Annotation** — notes, constraints, labels |
+| `.t`         | text `#2c6fa0` | —         | —        | —   | **Title** — container headings, bold 14px   |
+| `.l`         | text `#333`    | —         | —        | —   | **Label** — sub-box names, 12px             |
+| `.s`         | text `#555`    | —         | —        | —   | **Small** — annotations, metadata, 11px     |
+| `.e`         | fill none      | `#666`    | 1.5px    | —   | **Edge** — directional arrow path           |
 
-| Class | Fill | Stroke | Stroke-Width | rx | Usage |
-|-------|------|--------|-------------|-----|-------|
-| `.bx` | `#e8f4f8` | `#4a90d9` | 1.5px | 5px | Outer container box |
-| `.i` | `#d4e8f0` | `#4a90d9` | 1px | 3px | Inner sub-box |
-| `.ci` | `#d4e8f0` | `#4a90d9` | 1px | 3px | Alias for `.i` (pipeline CI items) |
-| `.gr` | `#d4edda` | `#5cb85c` | 1.5px | 5px | Key component / green container |
-| `.or` | `#fdf0d5` | `#f0ad4e` | 1px | 3px | Warning/intermediate step |
-| `.dc` | `#f0f0f0` | `#999` | 1px | 3px | Note/annotation |
-| `.t` | text: `#2c6fa0` | — | — | — | Title, bold 14px |
-| `.l` | text: `#333` | — | — | — | Label, 12px |
-| `.s` | text: `#666` | — | — | — | Small text, 11px |
-| `.e` | fill: none | `#666` | 1.5px | — | Arrow path |
+**Color usage rules (from Ware, visual variable ranking):**
 
-## 4. Arrow Marker
+- **Position** (x,y) encodes structure — most important variable
+- **Hue** (blue/green/orange/grey) encodes semantic role — max 7 distinct hues
+- **Intensity** (stroke width 1.5px vs 1px) encodes hierarchy
+- **Shape** (border radius: 5px containers vs 3px sub-boxes) is serial — use sparingly
+- Never use **red** for anything non-error
+- Never use **pure black** (`#000`) for text
+- No complementary pairs adjacent at full saturation
+- `.s` text uses `#555` not `#666` (WCAG 4.5:1 contrast)
+
+### 3. Spacing System
+
+Established from Graphviz DOT, ELK, and Sugiyama conventions.
+
+#### 3.1 Base Spacing Values
+
+| Token              | Value    | Source                               |
+| ------------------ | -------- | ------------------------------------ |
+| `--layer-gap`      | **48px** | Graphviz `ranksep` = 0.5in at 96dpi  |
+| `--node-gap`       | **24px** | Graphviz `nodesep` = 0.25in at 96dpi |
+| `--edge-gap`       | **10px** | ELK `spacing.edgeEdge`               |
+| `--edge-node-gap`  | **10px** | ELK `spacing.edgeNode`               |
+| `--container-pad`  | **12px** | ELK `padding`                        |
+| `--label-pad`      | **8px**  | ELK `nodeLabels.padding`             |
+| `--graph-padding`  | **12px** | Graphviz `pad` ≈ 8pt at 96dpi        |
+| `--sub-h`          | **28px** | Standard sub-box height              |
+| `--sub-h-sm`       | **26px** | Compact sub-box height (data flow)   |
+| `--sub-h-dc`       | **20px** | Annotation box height                |
+| `--text-offset-28` | **18**   | Text y offset for 28px boxes         |
+| `--text-offset-26` | **16**   | Text y offset for 26px boxes         |
+| `--text-offset-20` | **13**   | Text y offset for 20px boxes         |
+| `--text-offset-t`  | **20**   | Title y offset from container top    |
+
+#### 3.2 Spacing Ratio Chain
+
+From ELK defaults: `container-pad : node-gap : edge-gap : label-pad = 12 : 24 : 10 : 8`
+
+- `node-gap` (24px) = 2× container-pad — related-group gap is half of unrelated gap (Gestalt proximity)
+- `edge-gap` (10px) = `node-gap` / 2.4 — parallel edges need less separation than nodes
+- `label-pad` (8px) = label visually groups with its container
+
+#### 3.3 Spaciousness Scale
+
+All spacing values can be scaled uniformly using a multiplier:
+
+- **Tight** (1.0x): dense information display
+- **Normal** (1.5x): standard readability
+- **Relaxed** (2.0x): presentation/slide-friendly
+
+---
+
+## Part 2: Layout Formulas
+
+Based on Sugiyama layered graph drawing (layer assignment → crossing minimization → coordinate assignment → edge routing) adapted for hand-crafted diagrams.
+
+### 4. Container Sizing
+
+#### 4.1 Container Height
+
+Container height is determined by its CONTENTS, never hardcoded:
+
+```
+box_h = --container-pad + (N × --sub-h) + ((N-1) × --node-gap) + --container-pad
+```
+
+Where N = number of regular sub-boxes in the column.
+
+For columns with a `.dc` annotation at the end:
+
+```
+box_h = --container-pad + (R × --sub-h) + ((R-1) × --node-gap) + --node-gap + --sub-h-dc + --container-pad
+```
+
+Where R = number of regular sub-boxes before the annotation.
+Note: the gap before `.dc` uses the same `--node-gap` as regular gaps. There is no separate "dc gap" — the dc box gets 20px height and standard spacing.
+
+#### 4.2 Column Alignment (Same Section)
+
+**All containers in the same horizontal section must have the same height.**
+The tallest container (by sub-box count) determines the height for all peers.
+
+Shorter containers get EXTRA BOTTOM PADDING to match the tallest — never extra top padding.
+Extra padding = `tallest_h - computed_h` (distributed to bottom only).
+
+The `box_y` of all containers in a section is identical.
+
+#### 4.3 Container Width
+
+Container width is chosen by column type but must satisfy:
+
+```
+sub_w = box_w - (2 × --container-pad)
+sub_w >= longest_label_width + (2 × --label-pad)
+```
+
+Where `longest_label_width ≈ label_chars × font_size × 0.6` (approximate).
+
+**Never let text extend beyond the sub-box border.** If a label is too long:
+
+1. Shorten the label (acronym + annotation)
+2. Widen the container
+3. Use multi-line (two `<tspan>` elements)
+
+### 5. Sub-Box Positioning
+
+Given a container at `(box_x, box_y)` with dimensions `(box_w, box_h)`:
+
+```
+sub_w  = box_w - (2 × --container-pad)
+sub_x  = box_x + --container-pad
+first_y = box_y + --container-pad
+```
+
+For the i-th sub-box (0-indexed):
+
+```
+sub_y[i]    = first_y + i × (--sub-h + --node-gap)
+text_y[i]   = sub_y[i] + --text-offset-28     (for 28px boxes)
+```
+
+For mixed heights (regular + dc):
+
+```
+All regular: same formula as above using --sub-h
+dc annotation: y = last_regular_y + --sub-h + --node-gap
+```
+
+Arrow path from sub-box i to sub-box i+1 (same column):
+
+```
+M{sub_x + sub_w/2},{sub_y[i] + sub_height} L{sub_x + sub_w/2},{sub_y[i+1]}
+```
+
+### 6. Column Layout & Centering
+
+#### 6.1 Horizontal Distribution
+
+Given M containers with widths `w_0, w_1, ..., w_{M-1}` and gaps between them:
+
+```
+total_span = sum(w_i) + (M-1) × --node-gap
+start_x = (--viewbox-w - total_span) / 2
+```
+
+Container x positions:
+
+```
+x_0 = start_x
+x_1 = x_0 + w_0 + --node-gap
+x_2 = x_1 + w_1 + --node-gap
+...
+```
+
+#### 6.2 Vertical Center (Cross-Column Arrows)
+
+Cross-column arrows connect at the vertical center of each container:
+
+```
+cross_y = box_y + (box_h / 2)   // rounded to nearest even integer
+```
+
+Arrow path from left container's right edge to right container's left edge:
+
+```
+M{x_left + w_left},{cross_y} L{x_right},{cross_y}
+```
+
+### 7. Section Stacking
+
+When a diagram has multiple horizontal sections stacked vertically:
+
+```
+next_section_y = current_section_y + current_section_h + --layer-gap
+```
+
+Where `--layer-gap` = 48px (between section bottoms and next section tops).
+
+---
+
+## Part 3: Edge Routing Rules
+
+From orthogonal graph drawing conventions.
+
+### 8. Arrow Conventions
+
+| Edge Type                              | Style                                 | Source              |
+| -------------------------------------- | ------------------------------------- | ------------------- |
+| Sub-box → sub-box (same column)        | **Straight vertical**                 | Orthogonal: 0 bends |
+| Cross-column (same section)            | **Straight horizontal** at cross_y    | Orthogonal: 0 bends |
+| Sub-box → external (outside container) | **Straight vertical** or **90° bend** | ≤1 bend preferred   |
+| Cross-section (vertical)               | **Straight vertical**                 | Orthogonal: 0 bends |
+
+**Maximum bends per edge:**
+
+- 0 bends: preferred (straight orthogonal)
+- 1-2 bends: acceptable
+- 3-4 bends: consider re-layering
+- 5+ bends: redesign diagram (Ware: each bend reduces traceability ~15%)
+
+**Arrow shape:**
 
 ```svg
-<marker id="a" viewBox="0 0 10 10" refX="10" refY="5"
-        markerWidth="8" markerHeight="8" orient="auto" overflow="visible">
-  <path d="M0,0 L10,5 L0,10Z" fill="#666"/>
-</marker>
+<path d="M{cx},{source_y} L{cx},{target_y}" class="e"/>
 ```
 
-## 5. General Layout Methodology
+- Arrow head length: 10px (defined in marker viewBox)
+- Arrow head width: 8px (at widest point)
+- `refX="10"` ensures arrow tip stops at exact target boundary
+- Arrow head ≥ 3× line width (Tufte minimum effective difference)
 
-### 5.1 Column Geometry Formulas
-```
-box_height = top_padding + N × item_height + (N-1) × arrow_gap + bottom_padding
-item_y[i] = box_y + top_padding + i × (item_height + arrow_gap)
-text_y     = box_y + box_y_offset + cap_height_approx  (for 28px box: +18; for 20px box: +13)
-```
+---
 
-### 5.2 Column Placement
-```
-total_span = N × column_width + (N-1) × gap_between
-start_x    = (viewBox_width - total_span) / 2
-```
+## Part 4: Validation
 
-### 5.3 Centering the Whole Diagram
-```
-min_x = minimum x of all elements
-max_x = maximum x of all elements
-span_center = (min_x + max_x) / 2
-shift = (viewBox_width / 2) - span_center
-// Apply shift to all x-coordinates
-```
+### 9. Pre-Commit Checklist
 
-### 5.4 Cross-Column Arrows
-```
-cross_arrow_y = box_y + box_height / 2  // rounded to nearest integer
-```
-Cross-arrows always connect at the vertical center of the two boxes (not aligned to any sub-item).
+- [ ] Every container's height is COMPUTED from its contents, not hardcoded
+- [ ] All containers in the same horizontal section have IDENTICAL height
+- [ ] Cross-column arrows align to vertical center of both containers
+- [ ] No text extends beyond its box boundary
+- [ ] All arrows connect at exact source bottom / target top coordinates
+- [ ] Arrow marker `refX="10"` doesn't leave a gap to the target
+- [ ] All coordinates are even integers
+- [ ] ViewBox height = last element bottom + `--graph-padding` (12px)
+- [ ] ≤7 distinct hues used
+- [ ] ≤2 stroke widths used (1.5px + 1px)
+- [ ] ≤2 arrow styles (solid + optionally dashed)
+- [ ] No gradients, shadows, or 3D effects
+- [ ] No dead CSS class definitions
+- [ ] Root `<svg>` has explicit `font-size`
 
-### 5.5 Standard Values by Section
+### 10. Complexity Limits
 
-| Parameter | Architecture | Pipeline | Data Flow |
-|-----------|-------------|----------|-----------|
-| Column width | 200px | 170px | 220/200px |
-| Column height | 225px | 185px | 175px |
-| Column gap | 35px | 24px | 25px |
-| Item height | 28px | 28px | 26px |
-| Arrow gap | 24px | 24px | 18-24px |
-| dc box height | 20px | — | — |
-| Top padding | 35px | 35px | 35px |
-| Bottom padding | 16px | 18px | 14px |
+| Metric               | Max                                  | Source                                |
+| -------------------- | ------------------------------------ | ------------------------------------- |
+| Total nodes          | **20**                               | Ware: working memory limit            |
+| Hierarchy depth      | **7±2**                              | Miller's Law                          |
+| Bends per edge       | **4**                                | Ware: 15% readability drop per bend   |
+| Distinct hues        | **7**                                | Ware: pre-attentive limit             |
+| Font sizes           | **2** per diagram                    | Tufte: data-ink ratio                 |
+| Stroke widths        | **2** (1.5px primary, 1px secondary) | Tufte: smallest effective difference  |
+| Sub-boxes per column | **6**                                | Derived from 20 nodes / 3 avg columns |
 
-## 6. Architecture Diagram Layout
+### 11. Common Pitfalls
 
-### 6.1 Three-Column Layout
-```
-[app/ — Android App] ←35px→ [domain/ — Pure Kotlin] ←35px→ [data/ — Data Access]
-```
-- Each column: x = 65/300/535, y = 30, width = 200, height = 225
-- Sub-boxes: x = col_x + 10, width = 180, height = 28
-- Arrow gap between items: 24px (except before `.dc` annotation: 22px)
-- Bottom padding: 16px (box ends at y = 255)
+1. **Hardcoded height instead of computed**: Container height must use the formula: `pad + N×sub_h + (N-1)×gap + pad`. Never write `height="225"` without computing it.
 
-### 6.2 Sub-box Vertical Positions
+2. **Unmatched column heights**: One column with 4 items and another with 2 items — the shorter column gets extra bottom padding to match the taller. If you skip this, cross-column arrows won't align.
 
-| Item | y | height | bottom |
-|------|---|--------|--------|
-| Title text | 50 | — | — |
-| Item 1 | 65 | 28 | 93 |
-| Item 2 | 117 | 28 | 145 |
-| Item 3 | 169 | 28 | 197 |
-| Annotation (`.dc`) | 219 | 20 | 239 |
-| Box bottom | 255 | — | — |
+3. **Cross-arrow at sub-box y instead of center**: Cross-column arrows connect at `box_y + box_h/2`, not at the y of any particular sub-box.
 
-Arrow paths: `M{center_x},{bottom_N} L{center_x},{top_N+1}`
-Cross-column arrows: `M{col_right},{center_y} L{col_right+gap},{center_y}` where `center_y = 142`
+4. **Text overflow**: Label longer than `sub_w - 2×label_pad` will overflow. Measure before positioning.
 
-## 7. Data Flow Section Layout
+5. **Tiny arrow body**: If gap between two connected boxes is < 12px, the arrow marker (10px) consumes almost the entire gap — leaving no visible arrow shaft. Minimum gap between connected box edges: **24px**.
 
-### 7.1 Three-Column Layout
-```
-[Data Flow — Request Path] w=220 ←25px→ [Network] w=200 ←25px→ [Local Storage] w=200
-```
-- Section starts at y = 270 (15px gap below architecture section)
-- Column height: 175px
-- All sub-boxes: height = 26px
+6. **Dead CSS classes**: Remove any class not referenced by a diagram element.
 
-### 7.2 3-Item Column (Request Path)
-- Content: 26×3 + 24×2 = 126px
-- Box: 175px → padding: 24.5px each side → items at y = 305, 355, 405
-- Arrows: 24px gaps (331→355, 381→405)
+7. **Fractional coordinates**: Odd pixel values cause sub-pixel rendering. Always round to even.
 
-### 7.3 2-Item Columns (Network, Local Storage)
-- Content: 26 + 18 + 26 = 70px
-- Box: 175px → padding: 52.5px each side → items at y = 322, 366
-- Arrows: 18px gaps (348→366)
+8. **ViewBox truncation**: After computing all positions, verify the lowest element + 12px fits within the viewBox height.
 
-Cross-column arrows: `y = 270 + 175/2 = 357` (center of data flow boxes)
+9. **Over-nesting**: More than 7 levels of nested containers violates Miller's Law. Flatten or split.
 
-## 8. Pipeline Diagram Layout
-
-### 8.1 Four-Column Layout
-```
-[Development] ←24px→ [CI (GitHub Actions)] ←24px→ [Release] ←24px→ [Distribution]
-```
-- Column width: 170px, height: 185px
-- Sub-boxes: width = 150, height = 28
-- Arrow gap: 24px
-- All items use `.ci` class (alias for `.i`)
-
-### 8.2 3-Item Columns (Development, CI, Release)
-- Items at y = 65, 117, 169
-- Same stacking formula as architecture columns
-
-### 8.3 2-Item Column (Distribution)
-- Items at y = 82, 134 (centered: content 80px in 185px box → 52.5px each side)
-- Arrow: 110→134 (24px gap)
-
-Cross-column arrows: `y = 30 + 185/2 = 122`
-
-## 9. Color Coding
-
-| Color | Class | When to use |
-|-------|-------|-------------|
-| Blue border (`.bx`) | Container | Grouping related components |
-| Light blue (`.i`, `.ci`) | Support | Non-primary items, inner sub-boxes |
-| Green (`.gr`) | Primary/active | Core components, key workflow steps |
-| Orange (`.or`) | Transition | Network calls, build/release steps |
-| Grey (`.dc`) | Annotation | Notes, constraints |
-
-Note: `.gr` may be used for container boxes in pipeline diagrams (Distribution column).
-
-## 10. Text Conventions
-
-- Titles: `.t`, bold 14px, `fill:#2c6fa0`
-- Labels: `.l`, 12px, `fill:#333`
-- Small text: `.s`, 11px, `fill:#666`
-- All text: `text-anchor="middle"`
-- Font family: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`
-- Text vertical centering: for 28px box → `y = box_y + 18`; for 20px box → `y = box_y + 13`
-- No emoji in technical diagrams (use text descriptions)
-
-## 11. Architecture Rule Box
-
-- Positioned 25px below data flow section end
-- `x = 200, y = 470, width = 400, height = 90`
-- Title at y = 490 (20px from top)
-- Lines evenly spaced at 20px: 510, 530, 550
-- Box bottom at y = 560
-
-## 12. Common Pitfalls
-
-1. **Overflow**: Ensure last sub-item + bottom padding fits within bx height
-2. **Arrow connection**: Start/end must match exact source bottom / target top coordinates
-3. **Centering**: Always compute total span and center around viewBox/2
-4. **Right edge alignment**: Architecture and data flow outermost right edges must align
-5. **Text y**: Baseline convention — for 12px font in 28px box, use `y = box_y + 18`
-6. **dc box**: Always height = 20px, gap before dc is 22px (not 24px)
-7. **Cross-arrow y**: Always at box center (`box_y + box_h/2`), not tied to sub-items
-8. **viewBox**: After layout adjustments, verify viewBox covers all content with 30px margin
-9. **Font size**: Root `<svg>` has `font-size="13"` fallback; always override `.l` to 12px
-10. **Dead CSS**: Remove unused class definitions before committing
+10. **Stale viewBox when adding elements**: Every time you add a row, annotation, or section, re-check the viewBox height.
