@@ -44,7 +44,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Architecture tests | ✅ | 8 automated rules (ArchitectureTest.kt) |
 | Search index tests | ✅ | 45 tests — fuzzy matching, Levenshtein, performance |
 | Domain purity | ✅ | Zero framework deps, all tests are mock-free |
-|| Release script | ⚠️ Partial | `scripts/release.sh` manual; `.github/workflows/release.yml` automates APK build + GitHub Release on tag push |
+||| Release script | ✅ | `scripts/release.sh` automates version bump + CI tag push; `release.yml` builds APK + GitHub Release |
 | APK verification | ✅ | `CheckAndRenameDebugApk` Gradle task |
 | ProGuard/R8 | ✅ | 86-line ProGuard rules file |
 | Network security | ✅ | TLS pinning, cleartext blocked, HTTPS enforced |
@@ -57,8 +57,8 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Design decision records | ❌ **Missing** | No ADRs |
 | Commit date alias | ❌ **Missing** | Not set up |
 | Release notes from CHANGELOG | ❌ **Missing** | Manual `gh release create` |
-| PR template | ❌ **Missing** | No template |
-| Pre-commit hooks | ❌ **Missing** | Not configured |
+|| PR template | ✅ | `.github/PULL_REQUEST_TEMPLATE.md` with checks + conventional commit checklist |
+|| Pre-commit hooks | ✅ | `.githooks/pre-commit` auto-runs `spotlessApply` on staged .kt/.kts files |
 | Multi-architecture CI | ❌ **Missing** | No CI at all |
 
 ---
@@ -94,15 +94,15 @@ This project follows the design hierarchy from `DESIGN_STANDARDS_HIERARCHY.md`.
 
 | Gap | Effort | Impact | Why it matters |
 |-----|--------|--------|---------------|
-| **CI: build + test** | 1h | Prevents untested code | 112 tests run nowhere automatically |
-| **Static analysis (detekt/ktlint)** | 30m | Catches style bugs | No automated code quality enforcement |
-| **Dependabot** | 5m | Known-vulnerability deps | Transitive CVEs invisible |
-| **gradle.lockfile** | 5m | Reproducible builds | Dependency drift across machines |
-| **Test count badge auto-update** | 30m | Stale documentation | 3 different numbers exist |
-| **Conventional commits** | Discipline | Parseable history | Only 26% of commits use prefixes |
-| **Signed commits + tags** | 15m | Untrusted history | No commit verification possible |
-| **JaCoCo coverage gate** | 30m | Coverage regressions | No visibility into untested code |
-| **Release automation** | 1h | Manual release steps | `gh release create` done manually |
+| ~~CI: build + test~~ | ✅ Done | `.github/workflows/build.yml` |
+| ~~Static analysis (detekt)~~ | ✅ Done | `detekt` configured, runs in CI |
+| ~~Dependabot~~ | ✅ Done | `.github/dependabot.yml` weekly |
+| ~~gradle.lockfile~~ | ✅ Done | Dependency locking enabled |
+| ~~Test count badge auto-update~~ | ✅ Done | Badge auto-refreshed on main pushes |
+| ~~Conventional commits~~ | ✅ Done | Enforced on PRs |
+| ~~Signed commits + tags~~ | ✅ Done | SSH-signed; `tag.gpgSign=true` |
+| ~~JaCoCo coverage gate~~ | ✅ Done | 60% threshold configured |
+| ~~Release automation~~ | ✅ Done | `scripts/release.sh` + `release.yml` |
 
 ---
 
@@ -112,3 +112,4 @@ This project follows the design hierarchy from `DESIGN_STANDARDS_HIERARCHY.md`.
 |---------|------|---------|
 | 1.0 | 2026-07-01 | Initial: automation tiers 0-3 + design axioms applied after retrospective |
 || 1.1 | 2026-07-01 | Wave 1: CI workflow, Dependabot, JaCoCo plugin, STANDARDS.md updated |
+| 1.2 | 2026-07-01 | Waves 2-3 + full coverage: detekt, gitleaks, spotless, JaCoCo, commitlint, build provenance, release script, PR template, pre-commit |
