@@ -26,11 +26,11 @@ It is the applied version of the universal standards in the project-retrospectiv
 
 | Item | Status | How |
 |------|--------|-----|
-| Conventional commits | ⚠️ Partial | Adopted partway (~26% of commits use conventional prefixes) |
+| Conventional commits | ✅ | Enforced on PRs via `action-semantic-pull-request` |
 | CHANGELOG presence CI check | ✅ | CI checks CHANGELOG.md is non-empty + warns if not modified in PR |
 | Stats gate (derive from source) | ✅ | Badge auto-updated via CI after tests on main |
 | Build provenance | ✅ | BuildConfig.GIT_SHA + BUILD_TIME + CI_RUN_ID embedded in APK |
-| Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
+| Code coverage gate | ✅ | JaCoCo 0.8.12 with 60% threshold configured; `jacocoTestCoverageVerification` in CI |
 | Formatter enforcement | ✅ | `spotless` + `ktlint` — checked via CI |
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
