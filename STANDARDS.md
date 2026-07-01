@@ -28,13 +28,13 @@ It is the applied version of the universal standards in the project-retrospectiv
 |------|--------|-----|
 | Conventional commits | ⚠️ Partial | Adopted partway (~26% of commits use conventional prefixes) |
 | CHANGELOG presence CI check | ❌ **Missing** | No CI to check |
-| Stats gate (derive from source) | ❌ **Missing** | Test count badge not auto-updated; 3 different numbers exist |
+|| Stats gate (derive from source) | ✅ | Badge auto-updated via CI after tests on main |
 | Build provenance | ❌ **Missing** | No embedded build metadata |
 || Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
 | Formatter enforcement | ❌ **Missing** | No `ktlint` or `spotless` in CI |
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
-| Signed release tags | ❌ **Missing** | Tags not signed |
+|| Signed release tags | ❌ **Missing** | Tags not signed — requires GPG key setup |
 | Concurrency-safe state design | ⚠️ Partial | ViewModel has AtomicInteger for API status; rest is MutableStateFlow (thread-safe via channel) |
 
 ### Tier 2 — Within First Release (cumulative)
@@ -44,10 +44,11 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Architecture tests | ✅ | 8 automated rules (ArchitectureTest.kt) |
 | Search index tests | ✅ | 45 tests — fuzzy matching, Levenshtein, performance |
 | Domain purity | ✅ | Zero framework deps, all tests are mock-free |
-| Release script | ⚠️ Partial | `scripts/release.sh` exists but manual |
+|| Release script | ⚠️ Partial | `scripts/release.sh` manual; `.github/workflows/release.yml` automates APK build + GitHub Release on tag push |
 | APK verification | ✅ | `CheckAndRenameDebugApk` Gradle task |
 | ProGuard/R8 | ✅ | 86-line ProGuard rules file |
 | Network security | ✅ | TLS pinning, cleartext blocked, HTTPS enforced |
+|| ADRs (Architecture Decision Records) | ✅ | `docs/adr/` — 3 ADRs covering multi-module layout, domain purity, version catalog |
 
 ### Tier 3 — Quality of Life
 
