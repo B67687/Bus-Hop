@@ -13,9 +13,9 @@ It is the applied version of the universal standards in the project-retrospectiv
 
 | Item | Status | How |
 |------|--------|-----|
-| CI build + test | ❌ **Missing** | No CI workflows exist |
+|| CI build + test | ✅ | `.github/workflows/build.yml` — test + lint + assembleDebug on push/PR to main |
 | Static analysis (warnings-as-errors) | ❌ **Missing** | No detekt/ktlint configured; lint.xml exists but is minimal |
-| Dependency vulnerability scanning | ❌ **Missing** | No Dependabot or Renovate |
+|| Dependency vulnerability scanning | ✅ | `.github/dependabot.yml` — weekly checks for Gradle + GitHub Actions |
 | Secret scanning | ❌ **Missing** | No gitleaks or equivalent |
 | Signed commits | ❌ **Missing** | Commits not GPG-signed |
 | Reproducible builds | ❌ **Missing** | No `gradle.lockfile` |
@@ -30,7 +30,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | CHANGELOG presence CI check | ❌ **Missing** | No CI to check |
 | Stats gate (derive from source) | ❌ **Missing** | Test count badge not auto-updated; 3 different numbers exist |
 | Build provenance | ❌ **Missing** | No embedded build metadata |
-| Code coverage gate | ❌ **Missing** | No JaCoCo configured |
+|| Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
 | Formatter enforcement | ❌ **Missing** | No `ktlint` or `spotless` in CI |
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
@@ -110,3 +110,4 @@ This project follows the design hierarchy from `DESIGN_STANDARDS_HIERARCHY.md`.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-01 | Initial: automation tiers 0-3 + design axioms applied after retrospective |
+|| 1.1 | 2026-07-01 | Wave 1: CI workflow, Dependabot, JaCoCo plugin, STANDARDS.md updated |
