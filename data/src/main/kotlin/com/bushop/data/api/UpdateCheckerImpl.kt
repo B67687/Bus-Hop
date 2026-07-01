@@ -28,7 +28,7 @@ import java.io.FileOutputStream
 class UpdateCheckerImpl(
     private val context: Context,
     private val currentVersion: String,
-    private val githubRepo: String = "b67687-stable/Bus-Hop",
+    private val githubRepo: String = "B67687/Bus-Hop",
     internal val client: okhttp3.OkHttpClient = ApiClient.okHttpClient,
 ) : UpdateChecker {
     private val gson = GsonProvider.gson
