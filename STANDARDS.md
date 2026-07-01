@@ -13,12 +13,12 @@ It is the applied version of the universal standards in the project-retrospectiv
 
 | Item | Status | How |
 |------|--------|-----|
-|| CI build + test | ✅ | `.github/workflows/build.yml` — test + lint + assembleDebug on push/PR to main |
-| Static analysis (warnings-as-errors) | ❌ **Missing** | No detekt/ktlint configured; lint.xml exists but is minimal |
-|| Dependency vulnerability scanning | ✅ | `.github/dependabot.yml` — weekly checks for Gradle + GitHub Actions |
-| Secret scanning | ❌ **Missing** | No gitleaks or equivalent |
+| CI build + test | ✅ | `.github/workflows/build.yml` — test + lint + assembleDebug on push/PR to main |
+| Static analysis | ✅ | `detekt` configured + runs in CI |
+| Dependency vulnerability scanning | ✅ | `.github/dependabot.yml` — weekly checks for Gradle + GitHub Actions |
+| Secret scanning | ✅ | `gitleaks` runs as parallel CI job on push/PR |
 | Signed commits | ❌ **Missing** | Commits not GPG-signed |
-| Reproducible builds | ❌ **Missing** | No `gradle.lockfile` |
+| Reproducible builds | ✅ | Dependency locking enabled; `settings-gradle.lockfile` generated |
 | CHANGELOG | ✅ | Keep a Changelog format, retroactive for 41 releases |
 | README skeleton | ✅ | Well-structured: features, stack, build, privacy, testing |
 
@@ -27,14 +27,14 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Item | Status | How |
 |------|--------|-----|
 | Conventional commits | ⚠️ Partial | Adopted partway (~26% of commits use conventional prefixes) |
-| CHANGELOG presence CI check | ❌ **Missing** | No CI to check |
-|| Stats gate (derive from source) | ✅ | Badge auto-updated via CI after tests on main |
+| CHANGELOG presence CI check | ✅ | CI checks CHANGELOG.md is non-empty + warns if not modified in PR |
+| Stats gate (derive from source) | ✅ | Badge auto-updated via CI after tests on main |
 | Build provenance | ❌ **Missing** | No embedded build metadata |
-|| Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
-| Formatter enforcement | ❌ **Missing** | No `ktlint` or `spotless` in CI |
+| Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
+| Formatter enforcement | ✅ | `spotless` + `ktlint` — checked via CI |
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
-|| Signed release tags | ❌ **Missing** | Tags not signed — requires GPG key setup |
+| Signed release tags | ❌ **Missing** | Tags not signed — requires GPG key setup |
 | Concurrency-safe state design | ⚠️ Partial | ViewModel has AtomicInteger for API status; rest is MutableStateFlow (thread-safe via channel) |
 
 ### Tier 2 — Within First Release (cumulative)
