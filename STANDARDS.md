@@ -54,9 +54,9 @@ It is the applied version of the universal standards in the project-retrospectiv
 
 | Item | Status | How |
 |------|--------|-----|
-| Design decision records | ❌ **Missing** | No ADRs |
-| Commit date alias | ❌ **Missing** | Not set up |
-| Release notes from CHANGELOG | ❌ **Missing** | Manual `gh release create` |
+||| Design decision records | ✅ | `docs/adr/` — 3 architecture decision records |
+|| Commit date alias | ✅ | `git dates` — colored log with %h, %as, %s |
+|| Release notes from CHANGELOG | ✅ | `release.yml` extracts the version section from CHANGELOG.md for the release body |
 || PR template | ✅ | `.github/PULL_REQUEST_TEMPLATE.md` with checks + conventional commit checklist |
 || Pre-commit hooks | ✅ | `.githooks/pre-commit` auto-runs `spotlessApply` on staged .kt/.kts files |
 | Multi-architecture CI | ❌ **Missing** | No CI at all |
