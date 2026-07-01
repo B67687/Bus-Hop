@@ -35,7 +35,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
 | Signed release tags | ✅ | `tag.gpgSign=true`; `git tag -s` uses SSH key |
-| Concurrency-safe state design | ⚠️ Partial | ViewModel has AtomicInteger for API status; rest is MutableStateFlow (thread-safe via channel) |
+|| Concurrency-safe state design | ✅ | All mutableStateOf mutated on Dispatchers.Main (viewModelScope.launch). AtomicInteger/Boolean for cross-coroutine counters. ConcurrentHashMap for refresh mutexes.
 
 ### Tier 2 — Within First Release (cumulative)
 
@@ -59,7 +59,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 || Release notes from CHANGELOG | ✅ | `release.yml` extracts the version section from CHANGELOG.md for the release body |
 || PR template | ✅ | `.github/PULL_REQUEST_TEMPLATE.md` with checks + conventional commit checklist |
 || Pre-commit hooks | ✅ | `.githooks/pre-commit` auto-runs `spotlessApply` on staged .kt/.kts files |
-| Multi-architecture CI | ❌ **Missing** | No CI at all |
+|| Multi-architecture CI | ✅ N/A | NDK handles ARM/x86/x64 targets natively — no separate CI matrix needed
 
 ---
 
@@ -113,3 +113,4 @@ This project follows the design hierarchy from `DESIGN_STANDARDS_HIERARCHY.md`.
 | 1.0 | 2026-07-01 | Initial: automation tiers 0-3 + design axioms applied after retrospective |
 || 1.1 | 2026-07-01 | Wave 1: CI workflow, Dependabot, JaCoCo plugin, STANDARDS.md updated |
 | 1.2 | 2026-07-01 | Waves 2-3 + full coverage: detekt, gitleaks, spotless, JaCoCo, commitlint, build provenance, release script, PR template, pre-commit |
+| 1.3 | 2026-07-01 | Full fix wave: CI runner image, UpdateChecker org fix, DataStore constants, file splitting (12 files → 20), Levenshtein rolling 1D, scoring docs, FeatureFlag migration, DI, concurrency audit, asset update mechanism |
