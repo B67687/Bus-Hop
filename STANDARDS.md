@@ -17,7 +17,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Static analysis | ✅ | `detekt` configured + runs in CI |
 | Dependency vulnerability scanning | ✅ | `.github/dependabot.yml` — weekly checks for Gradle + GitHub Actions |
 | Secret scanning | ✅ | `gitleaks` runs as parallel CI job on push/PR |
-| Signed commits | ❌ **Missing** | Commits not GPG-signed |
+| Signed commits | ✅ | All commits GPG-signed (`commit.gpgsign=true`, key `70332898EE206503`) |
 | Reproducible builds | ✅ | Dependency locking enabled; `settings-gradle.lockfile` generated |
 | CHANGELOG | ✅ | Keep a Changelog format, retroactive for 41 releases |
 | README skeleton | ✅ | Well-structured: features, stack, build, privacy, testing |
@@ -29,12 +29,12 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Conventional commits | ⚠️ Partial | Adopted partway (~26% of commits use conventional prefixes) |
 | CHANGELOG presence CI check | ✅ | CI checks CHANGELOG.md is non-empty + warns if not modified in PR |
 | Stats gate (derive from source) | ✅ | Badge auto-updated via CI after tests on main |
-| Build provenance | ❌ **Missing** | No embedded build metadata |
+| Build provenance | ✅ | BuildConfig.GIT_SHA + BUILD_TIME + CI_RUN_ID embedded in APK |
 | Code coverage gate | ⚠️ Partial | JaCoCo plugin added to app/build.gradle.kts; threshold not yet configured |
 | Formatter enforcement | ✅ | `spotless` + `ktlint` — checked via CI |
 | EditorConfig | ✅ | Present with LF, UTF-8, indent settings |
 | SDK/toolchain pinning | ✅ | `gradle-wrapper.properties` pins Gradle 9.5.1; JDK 17 specified |
-| Signed release tags | ❌ **Missing** | Tags not signed — requires GPG key setup |
+| Signed release tags | ✅ | `tag.gpgSign=true`; `git tag -s` enforced |
 | Concurrency-safe state design | ⚠️ Partial | ViewModel has AtomicInteger for API status; rest is MutableStateFlow (thread-safe via channel) |
 
 ### Tier 2 — Within First Release (cumulative)
