@@ -4,12 +4,14 @@ This file documents which automation and design standards apply to this specific
 It is the applied version of the universal standards in the project-retrospective-methodology repo.
 
 **Universal reference**: `github.com/B67687/project-retrospective-methodology`
+>
+> **⚠️ Retrospective**: This file documents the current state after retrospective application. These standards were **not** present from Day 1 — they were applied after the fact. See the [Version](#version) table for when each item was introduced.
 
 ---
 
 ## Automation Standards Applied
 
-### Tier 0 — Day 1 (present at project creation)
+### Tier 0 — Core Infrastructure (retrospectively applied)
 
 | Item | Status | How |
 |------|--------|-----|
@@ -22,7 +24,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | CHANGELOG | ✅ | Keep a Changelog format, retroactive for 41 releases |
 | README skeleton | ✅ | Well-structured: features, stack, build, privacy, testing |
 
-### Tier 1 — Within 10 Commits
+### Tier 1 — Development Discipline (retrospectively applied)
 
 | Item | Status | How |
 |------|--------|-----|
@@ -37,7 +39,7 @@ It is the applied version of the universal standards in the project-retrospectiv
 | Signed release tags | ✅ | `tag.gpgSign=true`; `git tag -s` uses SSH key |
 || Concurrency-safe state design | ✅ | All mutableStateOf mutated on Dispatchers.Main (viewModelScope.launch). AtomicInteger/Boolean for cross-coroutine counters. ConcurrentHashMap for refresh mutexes.
 
-### Tier 2 — Within First Release (cumulative)
+### Tier 2 — Production Readiness (retrospectively applied)
 
 | Item | Status | How |
 |------|--------|-----|
@@ -57,7 +59,6 @@ It is the applied version of the universal standards in the project-retrospectiv
 ||| Design decision records | ✅ | `docs/adr/` — 3 architecture decision records |
 || Commit date alias | ✅ | `git dates` — colored log with %h, %as, %s |
 || Release notes from CHANGELOG | ✅ | `release.yml` extracts the version section from CHANGELOG.md for the release body |
-|| PR template | ✅ | `.github/PULL_REQUEST_TEMPLATE.md` with checks + conventional commit checklist |
 || Pre-commit hooks | ✅ | `.githooks/pre-commit` auto-runs `spotlessApply` on staged .kt/.kts files |
 || Multi-architecture CI | ✅ N/A | NDK handles ARM/x86/x64 targets natively — no separate CI matrix needed
 
